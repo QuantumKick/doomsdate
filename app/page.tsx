@@ -870,8 +870,8 @@ export default function EnchantingDateProposalApp() {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              src="https://media1.tenor.com/m/fRSVfm6M0ncAAAAd/gwen-amazing-spiderman.gif"
-              alt="Gwen Stacy gif"
+              src="https://media1.tenor.com/m/S9e4TZwmalYAAAAC/jarvis-dr-doom.gif"
+              alt="doom this guy gif"
               className="w-full max-w-md mx-auto mb-4 rounded-lg shadow-lg lg:max-h-[26vh] lg:w-auto"
             />{" "}
             <Button
