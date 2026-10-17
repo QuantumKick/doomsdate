@@ -540,7 +540,7 @@ export default function EnchantingDateProposalApp() {
       </h1>
       <p className="text-lg text-emerald-100/80 mb-8 max-w-md mx-auto">
         Before the multiverse collapses, I&apos;m conducting a very official,
-        very serious Marvel survey. Please participate.
+        very serious survey.
       </p>
       <Button onClick={() => setStep(step + 1)} className={nextButtonClass}>
         Fine, I&apos;ll take the survey
