@@ -15,7 +15,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://doomsdate-ten.vercel.app/"),
+  metadataBase: new URL("https://doomsdate-ten.vercel.app"),
   title: "doomsdate",
   description: "That appears... Untrue",
   openGraph: {
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     siteName: "Doomsday",
     images: [
       {
-        url: "/og-image.jpg", // Automatically prepended with metadataBase
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Doomsday Preview",
