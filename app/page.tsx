@@ -30,7 +30,6 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  Pizza,
   Sandwich,
   Soup,
   Cookie,
@@ -922,7 +921,7 @@ export default function EnchantingDateProposalApp() {
     <motion.div key="step2" className="text-center" {...fadeInUp}>
       <div>
       <h2 className="text-4xl sm:text-5xl font-playfair font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-purple-300">
-        Baka gusto mo'ko pakainin
+        Baka gusto mo&apos;ko pakainin
       </h2>
       <div className="grid grid-cols-2 gap-4 md:gap-6 mb-8">
         {[
