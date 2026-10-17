@@ -15,20 +15,20 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://elleven-elleven.vercel.app"),
-  title: "Brand New Date",
-  description: "with great power, comes great responsibility",
+  metadataBase: new URL("https://doomsdate-ten.vercel.app/"),
+  title: "doomsdate",
+  description: "That appears... Untrue",
   openGraph: {
-    title: "Brand New Date",
-    description: "with great power, comes great responsibility",
-    url: "https://elleven-elleven.vercel.app",
-    siteName: "Brand New Date",
+    title: "Doomsday",
+    description: "That appears... Untrue",
+    url: "https://doomsdate-ten.vercel.app",
+    siteName: "Doomsday",
     images: [
       {
         url: "/og-image.jpg", // Automatically prepended with metadataBase
         width: 1200,
         height: 630,
-        alt: "Brand New Date Preview",
+        alt: "Doomsday Preview",
       },
     ],
     locale: "en_US",
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Brand New Date",
-    description: "with great power, comes great responsibility",
+    title: "Doomsday",
+    description: "That appears... Untrue",
     images: ["/og-image.jpg"],
   },
 };

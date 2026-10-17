@@ -21,6 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Wheat,
+  Sandwich,
+  Drumstick,
   Heart,
   Coffee,
   Utensils,
@@ -30,13 +33,8 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  Sandwich,
-  Soup,
-  Cookie,
   Camera,
   Mic,
-  ShoppingBag,
-  Footprints,
   Home,
   Target,
 } from "lucide-react";
@@ -71,53 +69,126 @@ const fadeInUp = {
   transition: { duration: 0.5 },
 };
 
-// Draws a LEGO-style minifigure in SVG
-function Minifig({ f = "#facc15", t, l, hg = "none", hc = "#111827", a, c }: Omit<Fig, "name" | "group">) {
-  const covered = hg === "mask" || hg === "cowl";
-  const headColor = covered ? hc : f;
-  const studColor = hg === "hair" || hg === "helmet" ? hc : headColor;
-  const eyeY = hg === "helmet" ? 22 : 18;
+// ---------------------------------------------------------------------------
+// HERO ROSTER
+// Each hero's picture lives in /public/minifigs/<slug>.<ext>, where the slug is
+// the name in lowercase with dashes (e.g. "Captain America (Sam)" ->
+// captain-america-sam.png). To use a different file or URL for one hero, add
+// `image: "/minifigs/my-file.webp"` to that hero.
+// ---------------------------------------------------------------------------
+type Fig = {
+  name: string;
+  image?: string;
+};
+
+const HEROES: Fig[] = [
+  // Avengers
+  { name: "Thor" },
+  { name: "Captain America (Sam)" },
+  { name: "Steve Rogers" },
+  { name: "Winter Soldier" },
+  { name: "Black Panther" },
+  { name: "Tony Stark" },
+  { name: "Hulk" },
+  { name: "Hawkeye" },
+  { name: "Scarlet Witch" },
+  { name: "Vision" },
+  { name: "Doctor Strange" },
+  { name: "Wong" },
+  { name: "Ant-Man" },
+  { name: "Wasp" },
+  { name: "Captain Marvel" },
+  { name: "Shang-Chi" },
+  { name: "Spider-Man" },
+  { name: "Loki" },
+  // Fantastic Four
+  { name: "Mr. Fantastic" },
+  { name: "Invisible Woman" },
+  { name: "Human Torch" },
+  { name: "The Thing" },
+  // X-Men
+  { name: "Professor X" },
+  { name: "Magneto" },
+  { name: "Cyclops" },
+  { name: "Beast" },
+  { name: "Nightcrawler" },
+  { name: "Mystique" },
+  { name: "Wolverine" },
+  { name: "Storm" },
+  { name: "Gambit" },
+  { name: "Deadpool" },
+  // Guardians
+  { name: "Star-Lord" },
+  { name: "Rocket" },
+  { name: "Groot" },
+  { name: "Gamora" },
+  { name: "Nebula" },
+  { name: "Drax" },
+  { name: "Mantis" },
+  // Thunderbolts
+  { name: "Yelena" },
+  { name: "Red Guardian" },
+  { name: "U.S. Agent" },
+  { name: "Ghost" },
+  { name: "Namor" },
+  { name: "Sentry" },
+  // Villains
+  { name: "Doctor Doom" },
+  { name: "Thanos" },
+];
+
+const TEAMS = [
+  { name: "Avengers", tag: "Earth's Mightiest Heroes", color: "#5e031a", members: ["Thor", "Tony Stark", "Captain America (Sam)", "Hulk", "Captain Marvel"] },
+  { name: "Fantastic Four", tag: "Marvel's First Family", color: "#3b82f6", members: ["Mr. Fantastic", "Invisible Woman", "Human Torch", "The Thing"] },
+  { name: "X-Men", tag: "Mutants unite", color: "#facc15", members: ["Professor X", "Wolverine", "Storm", "Nightcrawler"] },
+  { name: "Thunderbolts", tag: "Unlikely heroes", color: "#f87171", members: ["Yelena", "Red Guardian", "U.S. Agent", "Ghost"] },
+  { name: "Guardians", tag: "Caught on a feeling", color: "#4ade80", members: ["Star-Lord", "Rocket", "Groot", "Gamora"] },
+  { name: "Doom wins", tag: "Nobody survives", color: "#34d399", members: ["Doctor Doom"] },
+];
+
+const slugify = (name: string) =>
+  name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+const initials = (name: string) =>
+  name
+    .split(/[\s().-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+
+// .png, .jpg, .jpeg and .webp are tried in this order for each hero
+const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
+
+// Shows the hero's picture, or their initials if no image file is found yet
+function HeroFigure({ hero }: { hero: Fig }) {
+  const [attempt, setAttempt] = useState(0);
+  const src = hero.image
+    ? attempt === 0
+      ? hero.image
+      : null
+    : attempt < IMAGE_EXTENSIONS.length
+    ? `/minifigs/${slugify(hero.name)}.${IMAGE_EXTENSIONS[attempt]}`
+    : null;
+
   return (
-    <svg viewBox="0 0 60 88" className="h-full w-auto" aria-hidden="true">
-      {c && <path d="M15 30 L45 30 L52 78 L8 78 Z" fill={c} opacity="0.9" />}
-      {/* legs + feet */}
-      <rect x="16" y="58" width="13" height="22" rx="2" fill={l} />
-      <rect x="31" y="58" width="13" height="22" rx="2" fill={l} />
-      <rect x="14" y="78" width="16" height="6" rx="2" fill="#000" opacity="0.35" />
-      <rect x="30" y="78" width="16" height="6" rx="2" fill="#000" opacity="0.35" />
-      {/* arms + hands */}
-      <rect x="5" y="32" width="10" height="23" rx="3" fill={t} />
-      <rect x="45" y="32" width="10" height="23" rx="3" fill={t} />
-      <circle cx="10" cy="58" r="4.2" fill={f} />
-      <circle cx="50" cy="58" r="4.2" fill={f} />
-      {/* torso */}
-      <rect x="14" y="30" width="32" height="30" rx="3" fill={t} />
-      <rect x="14" y="30" width="32" height="30" rx="3" fill="none" stroke="#000" strokeOpacity="0.25" />
-      {a && <circle cx="30" cy="44" r="5.5" fill={a} />}
-      {/* neck + head stud + head */}
-      <rect x="25" y="26" width="10" height="5" fill={f} />
-      <rect x="25" y="3" width="10" height="7" rx="2" fill={studColor} />
-      <rect x="19" y="9" width="22" height="19" rx="6" fill={headColor} />
-      {hg === "hair" && (
-        <path d="M18.5 17 V13 Q18.5 5 30 5 Q41.5 5 41.5 13 V17 Q41.5 11 30 11 Q18.5 11 18.5 17 Z" fill={hc} />
-      )}
-      {hg === "helmet" && (
-        <path d="M18.5 19.5 V13 Q18.5 4 30 4 Q41.5 4 41.5 13 V19.5 Z" fill={hc} />
-      )}
-      {/* face */}
-      {covered ? (
-        <>
-          <ellipse cx="25.5" cy="18" rx="3" ry="1.8" fill="#fff" />
-          <ellipse cx="34.5" cy="18" rx="3" ry="1.8" fill="#fff" />
-        </>
+    <div className="absolute inset-0 flex items-center justify-center">
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={hero.name}
+          draggable={false}
+          onError={() => setAttempt((n) => n + 1)}
+          className="h-full w-full object-contain"
+        />
       ) : (
-        <>
-          <circle cx="25.5" cy={eyeY} r="1.6" fill="#111" />
-          <circle cx="34.5" cy={eyeY} r="1.6" fill="#111" />
-          <path d={`M26 ${eyeY + 5} Q30 ${eyeY + 8} 34 ${eyeY + 5}`} stroke="#111" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-        </>
+        <span className="flex h-3/4 w-3/4 items-center justify-center rounded-full bg-zinc-700/70 text-xs sm:text-sm font-extrabold text-zinc-200">
+          {initials(hero.name)}
+        </span>
       )}
-    </svg>
+    </div>
   );
 }
 
@@ -126,10 +197,14 @@ function BrickTile({
   selected,
   onClick,
   children,
+  square = true,
+  accent,
 }: {
   selected: boolean;
   onClick: () => void;
   children: ReactNode;
+  square?: boolean;
+  accent?: string;
 }) {
   return (
     <motion.button
@@ -137,7 +212,10 @@ function BrickTile({
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className={`relative mt-2 flex flex-col items-center rounded-lg border-2 border-b-4 px-2 pt-3 pb-2 transition-colors ${
+      style={!selected && accent ? { borderColor: `${accent}80` } : undefined}
+      className={`relative mt-2 flex w-full flex-col items-center rounded-lg border-2 border-b-4 px-2 pt-3 pb-2 transition-colors ${
+        square ? "aspect-square" : ""
+      } ${
         selected
           ? "border-yellow-300 bg-yellow-400/20 shadow-[0_0_18px_rgba(250,204,21,0.45)]"
           : "border-zinc-600 bg-zinc-800/80 hover:border-zinc-400"
@@ -188,90 +266,6 @@ function ChoiceButton({
   );
 }
 
-// Edit these freely. Cast lists change, so tweak to whoever you think is in it.
-// ---------------------------------------------------------------------------
-// LEGO-style hero roster. Every minifigure is drawn in SVG from these colors,
-// so no hero images are needed. Colors are stylized, not exact costumes.
-//   f=face  t=torso  l=legs  hg=headgear  hc=headgear color  a=chest emblem  c=cape
-// ---------------------------------------------------------------------------
-type Fig = {
-  name: string;
-  group: string;
-  f?: string;
-  t: string;
-  l: string;
-  hg?: "hair" | "helmet" | "mask" | "cowl" | "none";
-  hc?: string;
-  a?: string;
-  c?: string;
-};
-
-const HERO_GROUPS = ["All", "Avengers", "Fantastic Four", "X-Men", "Guardians", "Thunderbolts", "Villains"];
-
-const HEROES: Fig[] = [
-  // Avengers
-  { name: "Thor", group: "Avengers", t: "#9ca3af", l: "#374151", hg: "hair", hc: "#facc15", c: "#dc2626", a: "#60a5fa" },
-  { name: "Captain America", group: "Avengers", t: "#1e40af", l: "#1e3a8a", hg: "helmet", hc: "#1e40af", a: "#ffffff" },
-  { name: "Winter Soldier", group: "Avengers", t: "#111827", l: "#111827", hg: "hair", hc: "#78350f", a: "#9ca3af" },
-  { name: "Black Panther", group: "Avengers", t: "#111827", l: "#111827", hg: "mask", hc: "#111827", a: "#d1d5db" },
-  { name: "Iron Man", group: "Avengers", t: "#b91c1c", l: "#b91c1c", hg: "mask", hc: "#b91c1c", a: "#facc15" },
-  { name: "Hulk", group: "Avengers", f: "#4ade80", t: "#4ade80", l: "#7c3aed", hg: "hair", hc: "#1f2937" },
-  { name: "Black Widow", group: "Avengers", t: "#111827", l: "#111827", hg: "hair", hc: "#dc2626", a: "#dc2626" },
-  { name: "Hawkeye", group: "Avengers", t: "#6d28d9", l: "#1f2937", hg: "hair", hc: "#92400e", a: "#a78bfa" },
-  { name: "Scarlet Witch", group: "Avengers", t: "#b91c1c", l: "#7f1d1d", hg: "hair", hc: "#7c2d12", a: "#facc15" },
-  { name: "Vision", group: "Avengers", f: "#dc2626", t: "#16a34a", l: "#16a34a", c: "#facc15", a: "#facc15" },
-  { name: "Doctor Strange", group: "Avengers", t: "#1d4ed8", l: "#1f2937", hg: "hair", hc: "#111827", c: "#dc2626", a: "#facc15" },
-  { name: "Wong", group: "Avengers", t: "#7f1d1d", l: "#1f2937", hg: "hair", hc: "#111827", a: "#facc15" },
-  { name: "Ant-Man", group: "Avengers", t: "#7f1d1d", l: "#7f1d1d", hg: "helmet", hc: "#7f1d1d", a: "#9ca3af" },
-  { name: "Wasp", group: "Avengers", t: "#1f2937", l: "#1f2937", hg: "helmet", hc: "#facc15", a: "#facc15" },
-  { name: "Captain Marvel", group: "Avengers", t: "#1d4ed8", l: "#1d4ed8", hg: "hair", hc: "#facc15", a: "#dc2626", c: "#dc2626" },
-  { name: "Shang-Chi", group: "Avengers", t: "#7f1d1d", l: "#111827", hg: "hair", hc: "#111827", a: "#facc15" },
-  { name: "Spider-Man", group: "Avengers", t: "#dc2626", l: "#1d4ed8", hg: "mask", hc: "#dc2626", a: "#111827" },
-  { name: "Loki", group: "Avengers", t: "#166534", l: "#111827", hg: "hair", hc: "#111827", c: "#166534", a: "#facc15" },
-  // Fantastic Four
-  { name: "Mr. Fantastic", group: "Fantastic Four", t: "#1d4ed8", l: "#1d4ed8", hg: "hair", hc: "#9ca3af", a: "#ffffff" },
-  { name: "Invisible Woman", group: "Fantastic Four", t: "#1d4ed8", l: "#1d4ed8", hg: "hair", hc: "#facc15", a: "#ffffff" },
-  { name: "Human Torch", group: "Fantastic Four", t: "#1d4ed8", l: "#1d4ed8", hg: "hair", hc: "#78350f", a: "#f97316" },
-  { name: "The Thing", group: "Fantastic Four", f: "#f97316", t: "#f97316", l: "#1d4ed8", a: "#1d4ed8" },
-  // X-Men
-  { name: "Professor X", group: "X-Men", t: "#1f2937", l: "#1f2937", a: "#facc15" },
-  { name: "Magneto", group: "X-Men", t: "#7f1d1d", l: "#7f1d1d", hg: "helmet", hc: "#dc2626", c: "#7f1d1d", a: "#facc15" },
-  { name: "Cyclops", group: "X-Men", t: "#1d4ed8", l: "#1d4ed8", hg: "hair", hc: "#78350f", a: "#facc15" },
-  { name: "Beast", group: "X-Men", f: "#3b82f6", t: "#1d4ed8", l: "#1d4ed8", hg: "hair", hc: "#3b82f6", a: "#facc15" },
-  { name: "Nightcrawler", group: "X-Men", f: "#1d4ed8", t: "#111827", l: "#111827", hg: "hair", hc: "#111827", a: "#dc2626" },
-  { name: "Mystique", group: "X-Men", f: "#3b82f6", t: "#f5f5f4", l: "#f5f5f4", hg: "hair", hc: "#dc2626", a: "#facc15" },
-  { name: "Wolverine", group: "X-Men", t: "#facc15", l: "#1d4ed8", hg: "hair", hc: "#78350f", a: "#1d4ed8" },
-  { name: "Storm", group: "X-Men", t: "#f5f5f4", l: "#f5f5f4", hg: "hair", hc: "#e5e7eb", c: "#3b82f6", a: "#3b82f6" },
-  { name: "Gambit", group: "X-Men", t: "#7e22ce", l: "#7e22ce", hg: "hair", hc: "#78350f", c: "#92400e", a: "#dc2626" },
-  { name: "Deadpool", group: "X-Men", t: "#b91c1c", l: "#b91c1c", hg: "mask", hc: "#b91c1c", a: "#111827" },
-  // Guardians
-  { name: "Star-Lord", group: "Guardians", t: "#7f1d1d", l: "#374151", hg: "helmet", hc: "#9ca3af", a: "#facc15" },
-  { name: "Rocket", group: "Guardians", f: "#b45309", t: "#f97316", l: "#f97316" },
-  { name: "Groot", group: "Guardians", f: "#92400e", t: "#92400e", l: "#78350f", a: "#4ade80" },
-  { name: "Gamora", group: "Guardians", f: "#4ade80", t: "#111827", l: "#111827", hg: "hair", hc: "#111827", a: "#4ade80" },
-  { name: "Nebula", group: "Guardians", f: "#3b82f6", t: "#1f2937", l: "#1f2937", a: "#9ca3af" },
-  { name: "Drax", group: "Guardians", f: "#94a3b8", t: "#7f1d1d", l: "#7f1d1d", a: "#dc2626" },
-  { name: "Mantis", group: "Guardians", t: "#166534", l: "#166534", hg: "hair", hc: "#111827", a: "#4ade80" },
-  // Thunderbolts
-  { name: "Yelena", group: "Thunderbolts", t: "#111827", l: "#111827", hg: "hair", hc: "#facc15", a: "#dc2626" },
-  { name: "Red Guardian", group: "Thunderbolts", t: "#b91c1c", l: "#b91c1c", hg: "hair", hc: "#78350f", a: "#facc15" },
-  { name: "U.S. Agent", group: "Thunderbolts", t: "#1d4ed8", l: "#1d4ed8", hg: "hair", hc: "#facc15", a: "#dc2626" },
-  { name: "Ghost", group: "Thunderbolts", t: "#f5f5f4", l: "#f5f5f4", hg: "mask", hc: "#f5f5f4", a: "#9ca3af" },
-  { name: "Namor", group: "Thunderbolts", t: "#0ea5e9", l: "#0ea5e9", hg: "hair", hc: "#111827", a: "#facc15" },
-  { name: "Sentry", group: "Thunderbolts", t: "#facc15", l: "#f5f5f4", hg: "hair", hc: "#fde047", c: "#facc15", a: "#dc2626" },
-  // Villains
-  { name: "Doctor Doom", group: "Villains", t: "#166534", l: "#374151", hg: "mask", hc: "#9ca3af", c: "#166534", a: "#9ca3af" },
-  { name: "Thanos", group: "Villains", f: "#a855f7", t: "#1d4ed8", l: "#6b7280", hg: "helmet", hc: "#facc15", a: "#facc15" },
-];
-
-// Put the images in /public/teams/ (keep filenames in sync with these paths).
-const TEAMS = [
-  { name: "Avengers", image: "/teams/avengers.jpg" },
-  { name: "Fantastic Four", image: "/teams/fantastic-four.jpg" },
-  { name: "X-Men", image: "/teams/x-men.jpg" },
-  { name: "Thunderbolts", image: "/teams/thunderbolts.jpg" },
-];
-
 // Custom dark date picker (purple + green), replaces the shadcn Calendar
 function DatePicker({
   selected,
@@ -306,7 +300,7 @@ function DatePicker({
     "h-9 w-9 rounded-full border border-purple-400/40 text-purple-200 flex items-center justify-center transition hover:bg-purple-900/50 disabled:opacity-30 disabled:hover:bg-transparent";
 
   return (
-    <div className="mx-auto w-full max-w-sm mb-4">
+    <div className="mx-auto w-full max-w-sm lg:max-w-xs mb-4">
       <div className="flex items-center justify-between mb-4">
         <button
           type="button"
@@ -443,7 +437,7 @@ function DoomsdayCountdown() {
   ];
 
   return (
-    <div className="pointer-events-none relative z-10 mb-6 text-center select-none">
+    <div className="pointer-events-none relative z-10 mb-4 lg:mb-3 text-center select-none shrink-0">
       <p className="text-[10px] sm:text-xs tracking-[0.5em] text-emerald-300/80 font-semibold mb-2">
         {diff > 0 ? "DOOMSDAY IS COMING" : "DOOMSDAY IS HERE"}
       </p>
@@ -452,7 +446,7 @@ function DoomsdayCountdown() {
           {units.map(({ label, value }, i) => (
             <div key={label} className="flex items-start gap-2 sm:gap-6">
               <div>
-                <div className="text-2xl sm:text-5xl font-extrabold tabular-nums drop-shadow-[0_0_14px_rgba(34,197,94,0.5)]">
+                <div className="text-2xl sm:text-4xl lg:text-4xl font-extrabold tabular-nums drop-shadow-[0_0_14px_rgba(34,197,94,0.5)]">
                   {value}
                 </div>
                 <div className="text-[9px] sm:text-[10px] tracking-[0.3em] mt-1">{label}</div>
@@ -490,8 +484,8 @@ export default function EnchantingDateProposalApp() {
   const [customInput, setCustomInput] = useState("");
   const [showHeroInput, setShowHeroInput] = useState(false);
   const [customHero, setCustomHero] = useState("");
-  const [heroGroup, setHeroGroup] = useState("All");
-  const [heroQuery, setHeroQuery] = useState("");
+  const [heroCursor, setHeroCursor] = useState(0);
+  const heroGridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setAnswers((prev) => ({ ...prev, time: `${hour}:${minute} ${ampm}` }));
@@ -525,116 +519,159 @@ export default function EnchantingDateProposalApp() {
   // ---------------------------------------------------------------------------
   // PRELUDE: Marvel / Avengers: Doomsday "survey" (the cover-up)
   // ---------------------------------------------------------------------------
-  const filteredHeroes = HEROES.filter(
-    (h) =>
-      (heroGroup === "All" || h.group === heroGroup) &&
-      h.name.toLowerCase().includes(heroQuery.trim().toLowerCase())
-  );
+  // --- Character-select screen logic (hero page) ---
+  const heroTotal = HEROES.length + 1; // +1 for "Add your own"
+  const customPicked =
+    !!answers.favoriteHero && !HEROES.some((h) => h.name === answers.favoriteHero);
+
+  const chooseHero = (i: number) => {
+    setHeroCursor(i);
+    if (i < HEROES.length) {
+      setShowHeroInput(false);
+      setAnswers((prev) => ({ ...prev, favoriteHero: HEROES[i].name }));
+    } else {
+      setCustomHero(customPicked ? answers.favoriteHero : "");
+      setShowHeroInput(true);
+    }
+  };
+
+  useEffect(() => {
+    if (step !== 1) return; // only on the hero page
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      const cols = heroGridRef.current
+        ? getComputedStyle(heroGridRef.current).gridTemplateColumns.split(" ").length
+        : 1;
+      let next = heroCursor;
+      if (e.key === "ArrowRight") next = Math.min(heroTotal - 1, heroCursor + 1);
+      else if (e.key === "ArrowLeft") next = Math.max(0, heroCursor - 1);
+      else if (e.key === "ArrowDown") next = Math.min(heroTotal - 1, heroCursor + cols);
+      else if (e.key === "ArrowUp") next = Math.max(0, heroCursor - cols);
+      else if (e.key === "Enter") {
+        e.preventDefault();
+        chooseHero(heroCursor);
+        return;
+      } else return;
+      e.preventDefault();
+      setHeroCursor(next);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, heroCursor, answers.favoriteHero]);
 
   const prelude = [
     // Intro
     <motion.div key="pre0" className="text-center" {...fadeInUp}>
-      <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-green-400">
-        Avengers: Doomsday is coming
+      <h1 className="text-5xl sm:text-7xl font-extrabold mb-5 text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+        Avengers: <span className="text-emerald-300">Doomsday</span> is coming
       </h1>
-      <p className="text-lg text-emerald-100/80 mb-8 max-w-md mx-auto">
+      <p className="text-lg sm:text-xl text-white/90 mb-8 max-w-lg mx-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
         Before the multiverse collapses, I&apos;m conducting a very official,
-        very serious survey.
+        very serious Marvel survey. Please participate.
       </p>
       <Button onClick={() => setStep(step + 1)} className={nextButtonClass}>
         Fine, I&apos;ll take the survey
       </Button>
     </motion.div>,
 
-    // Favorite hero (LEGO-style roster)
+    // Favorite hero: character-select screen
     <motion.div key="pre1" className="text-center" {...fadeInUp}>
-      <h2 className="text-3xl sm:text-4xl font-playfair font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-emerald-300">
+      <h2 className="text-2xl sm:text-3xl font-playfair font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-emerald-300">
         Who are you most excited to see in Doomsday?
       </h2>
-      <p className="text-sm text-emerald-200/60 mb-4">
-        Pick your fav, or enter your own.
+
+      {/* name banner for whoever the cursor is on */}
+      <div className="mx-auto mb-2 max-w-md -skew-x-12 border-y-2 border-emerald-300/70 bg-gradient-to-r from-purple-700/80 to-emerald-600/80 px-6 py-2 shadow-[0_0_24px_rgba(52,211,153,0.35)]">
+        <span className="block skew-x-12 text-lg sm:text-xl font-extrabold uppercase tracking-wide text-white">
+          {heroCursor < HEROES.length
+            ? HEROES[heroCursor].name
+            : customPicked
+            ? answers.favoriteHero
+            : "Add your own"}
+        </span>
+      </div>
+      <p className="text-xs text-emerald-200/60 mb-1">
+        Hover or use the arrow keys to browse. Click or press Enter to pick.
       </p>
 
-      {/* search + group tabs */}
-      <input
-        type="text"
-        value={heroQuery}
-        onChange={(e) => setHeroQuery(e.target.value)}
-        placeholder="Search heroes..."
-        className="w-full max-w-sm mx-auto mb-3 block px-4 py-2 border border-purple-400/40 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-300 text-purple-100 bg-black/50 placeholder:text-purple-200/40"
-      />
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-3 sm:flex-wrap sm:justify-center">
-        {HERO_GROUPS.map((g) => (
-          <button
-            key={g}
-            type="button"
-            onClick={() => setHeroGroup(g)}
-            className={`shrink-0 rounded-md border-b-4 px-3 py-1 text-xs font-bold transition ${
-              heroGroup === g
-                ? "bg-yellow-400 text-black border-yellow-600"
-                : "bg-zinc-800 text-zinc-200 border-zinc-950 hover:bg-zinc-700"
-            }`}
-          >
-            {g}
-          </button>
-        ))}
-      </div>
+      {/* tilted grid of character cards */}
+      <div style={{ perspective: "1000px" }} className="px-6 py-8">
+        <div
+          ref={heroGridRef}
+          className="grid grid-cols-8 sm:grid-cols-10 lg:grid-cols-12 gap-1.5"
+          style={{ transform: "rotateX(14deg)", transformStyle: "preserve-3d" }}
+        >
+          {HEROES.map((h, i) => {
+            const active = heroCursor === i;
+            const picked = answers.favoriteHero === h.name;
+            return (
+              <button
+                key={h.name}
+                type="button"
+                aria-label={h.name}
+                onMouseEnter={() => setHeroCursor(i)}
+                onFocus={() => setHeroCursor(i)}
+                onClick={() => chooseHero(i)}
+                className={`relative aspect-[2/3] rounded-md border-2 bg-gradient-to-b from-zinc-600 to-zinc-900 transition-transform duration-150 ${
+                  picked
+                    ? "border-yellow-300"
+                    : active
+                    ? "border-white"
+                    : "border-zinc-300/60"
+                }`}
+                style={{
+                  transform: active ? "scale(1.9) translateZ(30px)" : "none",
+                  zIndex: active ? 30 : picked ? 10 : 1,
+                  boxShadow: active
+                    ? "0 0 22px rgba(52,211,153,0.85)"
+                    : picked
+                    ? "0 0 14px rgba(250,204,21,0.7)"
+                    : "none",
+                }}
+              >
+                <span className="absolute inset-1">
+                  <HeroFigure hero={h} />
+                </span>
+              </button>
+            );
+          })}
 
-      {/* scrollable brick grid */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[340px] overflow-y-auto pt-3 pb-2 px-1 mb-4">
-        {filteredHeroes.map((h) => (
-          <BrickTile
-            key={h.name}
-            selected={answers.favoriteHero === h.name}
-            onClick={() => {
-              setShowHeroInput(false);
-              setAnswers({ ...answers, favoriteHero: h.name });
+          {/* Add your own */}
+          <button
+            type="button"
+            aria-label="Add your own"
+            onMouseEnter={() => setHeroCursor(HEROES.length)}
+            onFocus={() => setHeroCursor(HEROES.length)}
+            onClick={() => chooseHero(HEROES.length)}
+            className={`relative aspect-[2/3] rounded-md border-2 border-dashed bg-zinc-900 transition-transform duration-150 flex items-center justify-center ${
+              customPicked
+                ? "border-yellow-300"
+                : heroCursor === HEROES.length
+                ? "border-white"
+                : "border-zinc-300/60"
+            }`}
+            style={{
+              transform:
+                heroCursor === HEROES.length ? "scale(1.9) translateZ(30px)" : "none",
+              zIndex: heroCursor === HEROES.length ? 30 : 1,
+              boxShadow:
+                heroCursor === HEROES.length
+                  ? "0 0 22px rgba(52,211,153,0.85)"
+                  : "none",
             }}
           >
-            <div className="h-20">
-              <Minifig f={h.f} t={h.t} l={h.l} hg={h.hg} hc={h.hc} a={h.a} c={h.c} />
-            </div>
-            <span className="mt-1 text-[11px] sm:text-xs font-bold text-zinc-100 leading-tight text-center">
-              {h.name}
-            </span>
-          </BrickTile>
-        ))}
-
-        {/* Add your own */}
-        {(() => {
-          const isCustom =
-            !!answers.favoriteHero &&
-            !HEROES.some((h) => h.name === answers.favoriteHero);
-          return (
-            <BrickTile
-              selected={isCustom}
-              onClick={() => {
-                setCustomHero(isCustom ? answers.favoriteHero : "");
-                setShowHeroInput(true);
-              }}
-            >
-              <div className="h-20 flex items-center justify-center">
-                <PlusCircle className="w-10 h-10 text-yellow-300" />
-              </div>
-              <span className="mt-1 text-[11px] sm:text-xs font-bold text-zinc-100 leading-tight text-center">
-                {isCustom ? answers.favoriteHero : "Add your own"}
-              </span>
-            </BrickTile>
-          );
-        })()}
+            <PlusCircle className="w-1/2 h-1/2 text-yellow-300" />
+          </button>
+        </div>
       </div>
-
-      {filteredHeroes.length === 0 && (
-        <p className="text-sm text-emerald-200/60 mb-4">
-          No match. Use &quot;Add your own&quot; to type your pick.
-        </p>
-      )}
 
       {showHeroInput && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-md mx-auto p-4 bg-black/60 rounded-lg shadow-md border border-purple-400/30 mb-6"
+          className="max-w-md mx-auto p-4 bg-black/60 rounded-lg shadow-md border border-purple-400/30 mb-4"
         >
           <div className="flex gap-2">
             <input
@@ -668,6 +705,15 @@ export default function EnchantingDateProposalApp() {
         </motion.div>
       )}
 
+      <p className="text-sm text-emerald-100 mb-3 min-h-[1.25rem]">
+        {answers.favoriteHero ? (
+          <>
+            Your pick: <span className="font-bold text-yellow-300">{answers.favoriteHero}</span>
+          </>
+        ) : (
+          ""
+        )}
+      </p>
       <Button
         onClick={() => setStep(step + 1)}
         disabled={!answers.favoriteHero}
@@ -679,42 +725,38 @@ export default function EnchantingDateProposalApp() {
 
     // Team
     <motion.div key="pre3" className="text-center" {...fadeInUp}>
-      <h2 className="text-3xl sm:text-4xl font-playfair font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-green-400">
+      <h2 className="text-3xl sm:text-4xl font-playfair font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-emerald-300">
         Which team is surviving Doom?
       </h2>
-      <p className="text-sm text-emerald-200/60 mb-6">Choose wisely.</p>
-      <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
-        {TEAMS.map(({ name, image }) => {
-          const selected = answers.favoriteTeam === name;
+      <p className="text-sm text-emerald-200/60 mb-5">Choose wisely.</p>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6 pt-1">
+        {TEAMS.map((team) => {
+          const selected = answers.favoriteTeam === team.name;
+          const members = team.members
+            .map((n) => HEROES.find((h) => h.name === n))
+            .filter((h): h is Fig => !!h);
           return (
-            <motion.button
-              key={name}
-              type="button"
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => setAnswers({ ...answers, favoriteTeam: name })}
-              className={`relative h-32 sm:h-40 rounded-xl overflow-hidden border-2 shadow-md transition-all duration-300 ${
-                selected
-                  ? "border-emerald-300 ring-4 ring-emerald-400/50"
-                  : "border-emerald-500/40"
-              }`}
-              style={{
-                backgroundColor: "#064e3b", // fallback if the image is missing
-                backgroundImage: `url(${image})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
+            <BrickTile
+              key={team.name}
+              square={false}
+              accent={team.color}
+              selected={selected}
+              onClick={() => setAnswers({ ...answers, favoriteTeam: team.name })}
             >
-              <span className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              {selected && (
-                <span className="absolute top-2 right-2 bg-emerald-500 text-white text-xs font-bold rounded-full px-2 py-0.5">
-                  ✓
-                </span>
-              )}
-              <span className="absolute bottom-2 left-2 right-2 text-white font-bold text-sm sm:text-base text-left drop-shadow">
-                {name}
+              <div className="flex h-16 sm:h-20 w-full items-end justify-center -space-x-2">
+                {members.map((h) => (
+                  <div key={h.name} className="relative h-full aspect-[60/88]">
+                    <HeroFigure hero={h} />
+                  </div>
+                ))}
+              </div>
+              <span className="mt-2 text-sm sm:text-base font-extrabold text-zinc-100 leading-tight">
+                {team.name}
               </span>
-            </motion.button>
+              <span className="text-[11px] sm:text-xs font-semibold" style={{ color: team.color }}>
+                {team.tag}
+              </span>
+            </BrickTile>
           );
         })}
       </div>
@@ -785,16 +827,16 @@ export default function EnchantingDateProposalApp() {
       <h1 className="text-4xl sm:text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-emerald-300">
         My dearest, Gabrielle
         <span className="block mt-4 text-2xl sm:text-3xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-emerald-300">
-              Would you go see Avengers: Doomsday with me?
+              Come watch Avengers: Doomsday with me
         </span>
       </h1>
       <motion.img
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        src="https://media1.tenor.com/m/nzwXJrBLS4gAAAAd/andrew-garfield.gif"
-        alt="Andrew Garfield flower gif"
-        className="w-full max-w-md mx-auto mb-4 rounded-lg shadow-lg"
+        src="https://media1.tenor.com/m/8vXKZ8MRpZkAAAAd/marvel-cinematic-universe-victor-von-doom.gif"
+        alt="Victor von Doom gif"
+        className="w-full max-w-md mx-auto mb-4 rounded-lg shadow-lg lg:max-h-[26vh] lg:w-auto"
       />
       <div className="space-x-4">
         <Button
@@ -804,7 +846,7 @@ export default function EnchantingDateProposalApp() {
           }}
           className="bg-gradient-to-r from-purple-600 to-emerald-500 hover:from-purple-700 hover:to-emerald-600 text-white font-bold py-2 px-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-sm"
         >
-          Yes!!!
+          Ay tara
         </Button>
         <Dialog>
           <DialogTrigger asChild>
@@ -830,7 +872,7 @@ export default function EnchantingDateProposalApp() {
               transition={{ duration: 0.5 }}
               src="https://media1.tenor.com/m/fRSVfm6M0ncAAAAd/gwen-amazing-spiderman.gif"
               alt="Gwen Stacy gif"
-              className="w-full max-w-md mx-auto mb-4 rounded-lg shadow-lg"
+              className="w-full max-w-md mx-auto mb-4 rounded-lg shadow-lg lg:max-h-[26vh] lg:w-auto"
             />{" "}
             <Button
               onClick={() => {
@@ -852,15 +894,16 @@ export default function EnchantingDateProposalApp() {
       <h2 className="text-4xl sm:text-5xl font-playfair font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-emerald-300">
         Yay! When ka available
       </h2>
+      <div className="lg:flex lg:items-center lg:gap-6">
       <motion.img
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdHlnMGQ5OTFpMWJ3dzA3ZGwwZzZmamlqZXoxbmc1MGN3MjllMjd5YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wgKDTcjWHrsLb8loKQ/giphy.gif"
-        alt="spider-man running"
-        className="w-full max-w-md mx-auto mb-6 rounded-2xl shadow-2xl shadow-purple-400/30"
+        src="https://media1.tenor.com/m/JARech4LpOIAAAAd/huh-iron-man.gif"
+        alt="iron-kirk gif"
+        className="w-full max-w-md mx-auto mb-6 rounded-2xl shadow-2xl shadow-purple-400/30 lg:w-2/5 lg:mx-0"
       />
-      <div className="mb-6 p-5 bg-black/50 rounded-2xl shadow-lg border border-purple-400/30">
+      <div className="mb-6 p-5 bg-black/50 rounded-2xl shadow-lg border border-purple-400/30 lg:flex-1">
         <DatePicker
           selected={answers.date}
           onSelect={(date) => setAnswers({ ...answers, date })}
@@ -906,6 +949,7 @@ export default function EnchantingDateProposalApp() {
           </Select>
         </div>
       </div>
+      </div>
       <Button
         onClick={() => setStep(step + 1)}
         disabled={!answers.date || !answers.time}
@@ -921,15 +965,14 @@ export default function EnchantingDateProposalApp() {
     <motion.div key="step2" className="text-center" {...fadeInUp}>
       <div>
       <h2 className="text-4xl sm:text-5xl font-playfair font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-purple-300">
-        Baka gusto mo&apos;ko pakainin
+        baka gusto nyo ako pakainin
       </h2>
-      <div className="grid grid-cols-2 gap-4 md:gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-3 mb-8 lg:mb-6">
         {[
           { name: "Coffee or Tea, Kapit bisig!", icon: <Coffee className="w-6 h-6" /> },
-          { name: "Mcdo", icon: <Sandwich className="w-6 h-6" /> },
-          { name: "Ramen", icon: <Soup className="w-6 h-6" /> },
-          { name: "Samgyup", icon: <Utensils className="w-6 h-6" /> },
-          { name: "Sweets & dessert", icon: <Cookie className="w-6 h-6" /> },
+          { name: "Mcdo", icon: <Drumstick className="w-6 h-6" /> },
+          { name: "jobili", icon: <Sandwich className="w-6 h-6" /> },
+          { name: "mang inasal - walang kanin buseng", icon: <Wheat className="w-6 h-6" /> },
           { name: "''Kahit ano''", icon: <Utensils className="w-6 h-6" /> },
         ].map(({ name, icon }) => (
           <ChoiceButton
@@ -965,14 +1008,12 @@ export default function EnchantingDateProposalApp() {
   </div>
 
       {!showInput ? (
-        <div className="grid grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-3 mb-6">
           {[
             { name: "Bowling", icon: <Target className="mx-auto mb-2 w-6 h-6" /> },
             { name: "Arcade", icon: <Gamepad2 className="mx-auto mb-2 w-6 h-6" /> },
-            { name: "Window shopping", icon: <ShoppingBag className="mx-auto mb-2 w-6 h-6" /> },
             { name: "Photobooth", icon: <Camera className="mx-auto mb-2 w-6 h-6" /> },
             { name: "Karaoke", icon: <Mic className="mx-auto mb-2 w-6 h-6" /> },
-            { name: "Walk & chill", icon: <Footprints className="mx-auto mb-2 w-6 h-6" /> },
             { name: "Something else", icon: <PlusCircle className="mx-auto mb-2 w-6 h-6" /> },
             { name: "Uwi na q", icon: <Home className="mx-auto mb-2 w-6 h-6" /> },
           ].map((activity) => (
@@ -1041,7 +1082,7 @@ export default function EnchantingDateProposalApp() {
     <motion.div key="step4" className="text-center" {...fadeInUp}>
       <div>
       <h2 className="text-4xl sm:text-5xl font-playfair font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-purple-300">
-        How excited are you for our lakad?
+        How excited are you for our date?
       </h2>
       <div className="max-w-lg mx-auto mb-8 p-8 bg-black/40 rounded-2xl shadow-lg border border-purple-400/30">
         <Slider
@@ -1102,14 +1143,14 @@ export default function EnchantingDateProposalApp() {
         transition={{ duration: 0.5 }}
         src="https://media1.tenor.com/m/M0ARBQlZe10AAAAd/bee-minecraft.gif"
         alt="gabeee"
-        className="w-full max-w-md mx-auto mb-6 rounded-2xl shadow-2xl shadow-purple-400/30"
+        className="w-full max-w-md mx-auto mb-6 rounded-2xl shadow-2xl shadow-purple-400/30 lg:max-h-[24vh] lg:w-auto"
       />
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.5, type: "spring", stiffness: 260, damping: 20 }}
       >
-        <Heart className="text-emerald-400 w-16 h-16 mx-auto mt-6 animate-pulse" />
+        <Heart className="text-emerald-400 w-16 h-16 lg:w-10 lg:h-10 mx-auto mt-6 lg:mt-2 animate-pulse" />
       </motion.div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -1174,23 +1215,31 @@ export default function EnchantingDateProposalApp() {
     }
   }, [step, answers, steps.length]);
 
+  const isIntro = step === 0;
+
   return (
     <div
-      className="relative min-h-screen bg-black flex flex-col items-center justify-center p-6"
+      className="relative min-h-screen lg:h-screen lg:overflow-hidden bg-black flex flex-col items-center justify-center p-4 sm:p-6"
       style={{
         // Put a dark, menacing Doom image at /public/doom-bg.jpg. Until then
         // you get the green-glow gradient underneath.
         backgroundImage:
-          "radial-gradient(ellipse at 50% 20%, rgba(34,197,94,0.28), transparent 60%), linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.9)), url('/doom-bg.jpg')",
+          "radial-gradient(ellipse at 50% 20%, rgba(34,197,94,0.28), transparent 60%), url('/doom-bg.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundAttachment: "fixed",
       }}
     >
-      {/* dark vignette for the menacing look */}
+      {/* darkening layer: light on the intro so the background shows, heavier after */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/60 to-black/90 transition-opacity duration-700"
+        style={{ opacity: isIntro ? 0.2 : 1 }}
+      />
+      {/* vignette */}
+      <div
+        className="pointer-events-none absolute inset-0 transition-opacity duration-700"
         style={{
+          opacity: isIntro ? 0.45 : 1,
           background:
             "radial-gradient(circle at center, transparent 35%, rgba(0,0,0,0.85) 100%)",
         }}
@@ -1199,11 +1248,19 @@ export default function EnchantingDateProposalApp() {
       <Suspense fallback={null}>
         <HeartBackground />
       </Suspense>
-      <div className="relative z-10 w-full max-w-3xl">
+      <div className="relative z-10 w-full max-w-3xl lg:flex lg:flex-col lg:flex-1 lg:min-h-0 lg:max-h-[720px]">
         <FloatingOrbs />
-        <div className="relative w-full min-h-[560px] sm:min-h-[640px] flex flex-col justify-center overflow-hidden rounded-3xl border border-emerald-500/30 bg-black/60 backdrop-blur-md shadow-[0_0_60px_rgba(34,197,94,0.18)] p-6 sm:p-10">
-          <Sparkles count={18} />
-          <AnimatePresence mode="wait">{steps[step]}</AnimatePresence>
+        <div
+          className={`relative w-full min-h-[560px] sm:min-h-[640px] lg:min-h-0 lg:flex-1 flex flex-col overflow-y-auto overflow-x-hidden rounded-3xl p-6 sm:p-10 lg:p-8 transition-all duration-700 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+            isIntro
+              ? "border border-transparent bg-transparent"
+              : "border border-emerald-500/30 bg-black/60 backdrop-blur-md shadow-[0_0_60px_rgba(34,197,94,0.18)]"
+          }`}
+        >
+          {!isIntro && <Sparkles count={18} />}
+          <div className="my-auto">
+            <AnimatePresence mode="wait">{steps[step]}</AnimatePresence>
+          </div>
         </div>
         <FairyFooter />
       </div>
