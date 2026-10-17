@@ -19,16 +19,16 @@ export const metadata: Metadata = {
   title: "doomsdate",
   description: "That appears... Untrue",
   openGraph: {
-    title: "Doomsday",
+    title: "Doomsdate",
     description: "That appears... Untrue",
     url: "https://doomsdate-ten.vercel.app",
-    siteName: "Doomsday",
+    siteName: "Doomsdate",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Doomsday Preview",
+        alt: "Doomsdate Preview",
       },
     ],
     locale: "en_US",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Doomsday",
+    title: "Doomsdate",
     description: "That appears... Untrue",
     images: ["/og-image.jpg"],
   },
