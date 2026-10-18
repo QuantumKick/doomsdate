@@ -56,6 +56,7 @@ export async function POST(request: Request) {
       subject: 'YOU HAVE MAIL!',
       html: `
         <h1>She responded!</h1>
+        <p><strong>Answer: ${data.isAvailable === false ? 'No, not this time' : 'Yes'}</strong></p>
 
         <h2>The date</h2>
         <p>Date: ${esc(formattedDate)}</p>

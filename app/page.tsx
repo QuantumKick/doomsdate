@@ -485,6 +485,8 @@ export default function EnchantingDateProposalApp() {
   const [showHeroInput, setShowHeroInput] = useState(false);
   const [customHero, setCustomHero] = useState("");
   const [heroCursor, setHeroCursor] = useState(0);
+  const [declined, setDeclined] = useState(false); // she picked the real "No"
+  const [declineFinal, setDeclineFinal] = useState(false); // she confirmed it
   const heroGridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -827,7 +829,7 @@ export default function EnchantingDateProposalApp() {
       <h1 className="text-4xl sm:text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-emerald-300">
         My dearest, Gabrielle
         <span className="block mt-4 text-2xl sm:text-3xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-emerald-300">
-              Come watch Avengers: Doomsday with me
+              Come watch Doomsday with me
         </span>
       </h1>
       <motion.img
@@ -874,15 +876,27 @@ export default function EnchantingDateProposalApp() {
               alt="doom this guy gif"
               className="w-full max-w-md mx-auto mb-4 rounded-lg shadow-lg lg:max-h-[26vh] lg:w-auto"
             />{" "}
-            <Button
-              onClick={() => {
-                handleAnswer("isAvailable", true);
-                triggerConfetti();
-              }}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full transition-all duration-300 transform hover:scale-105"
-            >
-              Okay, fine...
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button
+                onClick={() => {
+                  handleAnswer("isAvailable", true);
+                  triggerConfetti();
+                }}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full transition-all duration-300 transform hover:scale-105"
+              >
+                Okay, fine...
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setAnswers((prev) => ({ ...prev, isAvailable: false }));
+                  setDeclined(true);
+                }}
+                className="border-zinc-500 text-zinc-300 bg-transparent hover:bg-zinc-800 hover:text-white font-bold py-2 px-4 rounded-full transition-all duration-300"
+              >
+                No
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
@@ -1175,6 +1189,42 @@ export default function EnchantingDateProposalApp() {
   // Marvel survey first, then the real invitation
   const steps = [...prelude, ...invitation];
 
+  // Shown instead of the flow if she chooses "No".
+  // The email is only sent once she presses "Finalize".
+  const declinedPage = (
+    <motion.div key={declineFinal ? "declined-final" : "declined"} className="text-center" {...fadeInUp}>
+      <h2 className="text-4xl sm:text-5xl font-playfair font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-emerald-300">
+        {declineFinal ? "Answer sent" : "That\u2019s okay!"}
+      </h2>
+      <p className="text-lg text-zinc-100 mb-2">Thank you for being honest with me.</p>
+      <p className="text-base text-purple-200 mb-8">
+        {declineFinal
+          ? "No pressure at all."
+          : "No pressure at all. Finalize to send your answer, or take a moment to think again."}
+      </p>
+      {!declineFinal && (
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Button
+            onClick={() => setDeclineFinal(true)}
+            className="bg-gradient-to-r from-purple-600 to-emerald-500 hover:from-purple-700 hover:to-emerald-600 text-white font-bold py-2 px-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-sm"
+          >
+            Finalize
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setAnswers((prev) => ({ ...prev, isAvailable: null }));
+              setDeclined(false);
+            }}
+            className="border-purple-400 text-purple-300 bg-transparent hover:bg-purple-900/40 hover:text-purple-200 font-bold py-2 px-4 rounded-full transition-all duration-300"
+          >
+            Wait, let me think again
+          </Button>
+        </div>
+      )}
+    </motion.div>
+  );
+
   useEffect(() => {
     const saveAnswers = async () => {
       // FIX: Extract local Year, Month, Day digits to prevent ISO string UTC conversion!
@@ -1210,10 +1260,10 @@ export default function EnchantingDateProposalApp() {
       }
     };
 
-    if (step === steps.length - 1) {
+    if (step === steps.length - 1 || (declined && declineFinal)) {
       saveAnswers();
     }
-  }, [step, answers, steps.length]);
+  }, [step, answers, steps.length, declined, declineFinal]);
 
   const isIntro = step === 0;
 
@@ -1259,7 +1309,7 @@ export default function EnchantingDateProposalApp() {
         >
           {!isIntro && <Sparkles count={18} />}
           <div className="my-auto">
-            <AnimatePresence mode="wait">{steps[step]}</AnimatePresence>
+            <AnimatePresence mode="wait">{declined ? declinedPage : steps[step]}</AnimatePresence>
           </div>
         </div>
         <FairyFooter />
